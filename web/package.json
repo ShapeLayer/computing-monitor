@@ -1,0 +1,23 @@
+{
+  "name": "computing-monitor-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-svelte": "^0.511.0",
+    "svelte": "^5.28.2"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte-check": "^4.1.6",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.1"
+  }
+}
