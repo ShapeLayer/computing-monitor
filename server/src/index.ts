@@ -7,6 +7,7 @@ import { collectorClient } from "./services/collectorClient.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 17700);
+const webApiBaseUrl = process.env.WEB_API_BASE_URL?.trim() || null;
 
 app.use(cors());
 app.use(express.json());
@@ -31,6 +32,12 @@ app.get("/api/capabilities", (_request, response) => {
     openFiles: false,
     perProcessGpu: false,
     multiHost: false
+  });
+});
+
+app.get("/api/client-config", (_request, response) => {
+  response.json({
+    apiBaseUrl: webApiBaseUrl
   });
 });
 

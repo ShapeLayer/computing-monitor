@@ -10,6 +10,20 @@ Returns server and collector health.
 
 Returns product-wide feature flags for this MVP.
 
+### `GET /api/client-config`
+
+Returns runtime client configuration values.
+
+Response body:
+
+```json
+{
+  "apiBaseUrl": "http://example-host:17700"
+}
+```
+
+`apiBaseUrl` can be `null` when no server-side override is configured.
+
 ### `GET /api/processes`
 
 Returns current process summaries.

@@ -71,10 +71,21 @@
     updatedAt: string;
   } | null;
 
+  type ClientConfig = {
+    apiBaseUrl?: string;
+  };
+
   type ProcessSortKey = "name" | "pid" | "cpuPercent" | "memoryBytes" | "status" | "note";
   type OverlayMode = "detail" | "note" | "logs" | null;
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:17700";
+  const defaultApiPort = import.meta.env.VITE_API_PORT ?? "17700";
+
+  function buildDefaultApiBaseUrl() {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:${defaultApiPort}`;
+  }
+
+  let apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? buildDefaultApiBaseUrl();
 
   let processes: ProcessSummary[] = [];
   let managedRuns: ManagedProcessSummary[] = [];
@@ -163,6 +174,22 @@
       throw new Error(await response.text());
     }
     return (await response.json()) as T;
+  }
+
+  async function loadClientConfig() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/client-config`);
+      if (!response.ok) {
+        return;
+      }
+
+      const config = (await response.json()) as ClientConfig;
+      if (config.apiBaseUrl && config.apiBaseUrl.trim()) {
+        apiBaseUrl = config.apiBaseUrl.trim();
+      }
+    } catch {
+      // Keep default API base URL when runtime client config is unavailable.
+    }
   }
 
   async function refreshOverview() {
@@ -359,6 +386,7 @@
   }
 
   onMount(async () => {
+    await loadClientConfig();
     await refreshOverview();
     if (selectedPid !== null) {
       await refreshSelectedProcess();
