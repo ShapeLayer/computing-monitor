@@ -43,6 +43,6 @@ app.use((error: Error, _request: express.Request, response: express.Response, _n
   });
 });
 
-app.listen(port, () => {
-  console.log(`server listening on http://127.0.0.1:${port}`);
+app.listen(port, "0.0.0.0", () => {
+  console.log(`server listening on http://0.0.0.0:${port}`);
 });
