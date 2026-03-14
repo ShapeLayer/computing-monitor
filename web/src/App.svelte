@@ -72,20 +72,49 @@
   } | null;
 
   type ClientConfig = {
-    apiBaseUrl?: string;
+    apiBaseUrl?: string | null;
   };
 
   type ProcessSortKey = "name" | "pid" | "cpuPercent" | "memoryBytes" | "status" | "note";
   type OverlayMode = "detail" | "note" | "logs" | null;
 
   const defaultApiPort = import.meta.env.VITE_API_PORT ?? "17700";
+  const loopbackHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+
+  function isLoopbackHost(hostname: string) {
+    return loopbackHosts.has(hostname.toLowerCase().replace(/^\[|\]$/g, ""));
+  }
+
+  const isBrowserLoopback = isLoopbackHost(window.location.hostname);
+
+  function normalizeApiBaseUrl(candidate: string | undefined | null): string | null {
+    if (!candidate?.trim()) {
+      return null;
+    }
+
+    try {
+      const parsed = new URL(candidate, window.location.href);
+      if (isLoopbackHost(parsed.hostname) && !isBrowserLoopback) {
+        return null;
+      }
+
+      return parsed.origin;
+    } catch {
+      return null;
+    }
+  }
 
   function buildDefaultApiBaseUrl() {
     const { protocol, hostname } = window.location;
     return `${protocol}//${hostname}:${defaultApiPort}`;
   }
 
-  let apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? buildDefaultApiBaseUrl();
+  function getInitialApiBaseUrl() {
+    const envBaseUrl = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
+    return envBaseUrl ?? buildDefaultApiBaseUrl();
+  }
+
+  let apiBaseUrl = getInitialApiBaseUrl();
 
   let processes: ProcessSummary[] = [];
   let managedRuns: ManagedProcessSummary[] = [];
@@ -184,8 +213,9 @@
       }
 
       const config = (await response.json()) as ClientConfig;
-      if (config.apiBaseUrl && config.apiBaseUrl.trim()) {
-        apiBaseUrl = config.apiBaseUrl.trim();
+      const normalized = normalizeApiBaseUrl(config.apiBaseUrl);
+      if (normalized) {
+        apiBaseUrl = normalized;
       }
     } catch {
       // Keep default API base URL when runtime client config is unavailable.

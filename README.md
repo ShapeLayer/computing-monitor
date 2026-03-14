@@ -61,5 +61,7 @@ Environment variables:
 
 - `COLLECTOR_BASE_URL` (server): collector endpoint (default: `http://127.0.0.1:7001`)
 - `WEB_API_BASE_URL` (server): optional API base URL override for web clients, returned by `GET /api/client-config`
+  - The web client automatically ignores loopback-only overrides (`localhost`/`127.0.0.1`/`::1`) when the page is opened from a remote host.
 - `VITE_API_BASE_URL` (web): optional build-time API base URL override
-- `VITE_API_PORT` (web): default API port used with current browser host when `VITE_API_BASE_URL` is not set (default: `17700`)
+  - If this is a loopback URL and the page is opened from a non-loopback hostname, the app falls back to the current browser host.
+- `VITE_API_PORT` (web): default API port used with current browser host when neither `VITE_API_BASE_URL` nor `/api/client-config` provide a usable API base URL (default: `17700`)
